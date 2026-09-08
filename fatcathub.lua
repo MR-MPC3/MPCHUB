@@ -6,6 +6,29 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualUser = game:GetService("VirtualUser")
 
 local LocalPlayer = Players.LocalPlayer
+
+-- ====================================================================
+-- 0. KIỂM TRA MAP (SEA CHECK)
+-- ====================================================================
+local MAP_SEAS = {
+    [85211729168715] = 1,   -- Sea 1
+    [79091703265657] = 2,   -- Sea 2
+    [100117331123089] = 3   -- Sea 3
+}
+
+local currentSea = MAP_SEAS[game.PlaceId]
+if not currentSea then
+    LocalPlayer:Kick("PlaceId không hợp lệ!")
+    return
+end
+
+local Sea1 = currentSea == 1
+local Sea2 = currentSea == 2
+local Sea3 = currentSea == 3
+
+-- ====================================================================
+-- KHỞI TẠO NHÂN VẬT
+-- ====================================================================
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
@@ -17,7 +40,6 @@ end)
 -- ====================================================================
 -- 1. BẢNG CẤU HÌNH & HỆ THỐNG TỰ ĐỘNG LƯU/TẢI THEO TÊN NGUỜI CHƠI
 -- ====================================================================
--- Tên file tự động lấy theo Username của tài khoản đang chơi
 local ConfigFileName = "BloxFruits_" .. LocalPlayer.Name .. "_Config.json"
 
 local DefaultConfig = {
@@ -75,7 +97,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 local Window = Fluent:CreateWindow({
     Title = "Blox Fruits Premium Hub",
-    SubTitle = "v2.5 Full Edition",
+    SubTitle = "v2.5 Full Edition | Sea " .. tostring(currentSea),
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
     Acrylic = true,
@@ -111,7 +133,7 @@ end
 -- [1. PARAGRAPH]
 Tabs.Farm:AddParagraph({
     Title = "Hướng Dẫn Sử Dụng",
-    Content = "Đây là khung chứa văn bản thông báo hoặc hướng dẫn.\nDùng \\n để xuống dòng."
+    Content = "Đang hoạt động tại: Sea " .. tostring(currentSea) .. "\nChọn các chức năng bên dưới để bắt đầu Farm."
 })
 
 -- [2. TOGGLE]
@@ -203,15 +225,12 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 -- 5. CẤU HÌNH TAB SETTING (THEME, TRONG SUỐT, PHÍM TẮT & NÚT RESET)
 -- ====================================================================
 
--- Khởi tạo cài đặt Giao diện (Theme, Transparency, Keybind)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 
--- Tự động tạo phần Theme, Transparency và Phím tắt
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
 
--- Phần quản lý Config tự động theo tên tài khoản
 Tabs.Setting:AddSection("Quản Lý Cấu Hình (" .. LocalPlayer.Name .. ")")
 
 Tabs.Setting:AddButton({
@@ -240,6 +259,6 @@ Tabs.Setting:AddButton({
 Window:SelectTab(1)
 Fluent:Notify({
     Title = "Blox Fruits Premium Hub",
-    Content = "Đã tải cấu hình tài khoản " .. LocalPlayer.Name .. "!",
+    Content = "Đã nhận diện Sea " .. tostring(currentSea) .. " | Tải cấu hình tài khoản " .. LocalPlayer.Name .. " thành công!",
     Duration = 5
 })
