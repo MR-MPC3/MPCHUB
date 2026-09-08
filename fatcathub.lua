@@ -112,7 +112,7 @@ Tabs.Farm:AddButton({
 Tabs.Farm:AddSection("Cấu Hình Menu Chọn")
 local ExampleDropdown = Tabs.Farm:AddDropdown("ExampleDropdown", {
     Title = "Danh Sách Chọn (Dropdown)",
-    Values = {"Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3","Lựa chọn 4","Lựa chọn 5","Lựa chọn 6","Lựa chọn 7","Lựa chọn 8","Lựa chọn 9","Lựa chọn 10","Lựa chọn 11","Lựa chọn 12"},
+    Values = {"Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3"},
     Default = "Lựa chọn 1",
     Multi = false,
     Callback = function(Value)
