@@ -16,7 +16,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
     HumanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
 end)
 
--- 1. BẢNG CẤU HÌNH (Lưu trạng thái bật/tắt biến)
+-- 1. BẢNG CẤU HÌNH (Lưu trạng thái biến)
 local Config = {
     AutoFarm = false,
     FarmMode = "Level",
@@ -28,53 +28,6 @@ local Config = {
     AutoCakePrince = false,
     AutoDoughKing = false,
     AutoBones = false,
-    
-    AutoStackMob = false,
-    BringMobDist = 250,
-    DisableMobCollision = false,
-    
-    SelectedStyle = "Godhuman",
-    AutoBuyStyle = false,
-    SelectedShopItem = "Random Fruit",
-    
-    AutoRejoin = true,
-    AutoHopLowServer = false,
-    
-    ESPPlayer = false,
-    ESPFruit = false,
-    ESPChest = false,
-    ESPBoss = false,
-    SelectedStat = "Melee",
-    AutoStats = false,
-    StatPoints = 1,
-    
-    AutoRandomFruit = false,
-    AutoStoreFruit = false,
-    SelectedRaid = "Flame",
-    AutoBuyChip = false,
-    AutoStartRaid = false,
-    AutoRaid = false,
-    
-    SelectedIsland = "Starter Island",
-    SelectedPlayer = "",
-    AutoKillTarget = false,
-    
-    AutoRaceV4 = false,
-    AutoPullLever = false,
-    AutoTempleTeleport = false,
-    AutoTrial = false,
-    
-    AutoSeaEvent = false,
-    AutoKillSeaBeast = false,
-    AutoKillTerrorShark = false,
-    BoatSpeed = 100,
-    
-    WhiteScreen = false,
-    AntiAFK = true,
-    
-    WebhookURL = "",
-    WebhookOnLevel = false,
-    WebhookOnFruit = false
 }
 
 -- 2. KHỞI TẠO CỬA SỔ UI (FLUENT)
@@ -114,63 +67,109 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- 4. VÍ DỤ MẪU: HƯỚNG DẪN CÁCH THÊM GIAO DIỆN VÀO CÁC TAB
+-- 4. BỘ MẪU CÁC THÀNH PHẦN GIAO DIỆN (FLUENT COMPONENTS)
 -- ====================================================================
 
--- [MẪU 1: VÍ DỤ CÔNG TẮC BẬT/TẮT (TOGGLE)]
-Tabs.Farm:AddSection("Ví Dụ Công Tắc")
+-- [1. MẪU ĐOẠN VĂN BẢN (PARAGRAPH)]
+Tabs.Farm:AddParagraph({
+    Title = "Hướng Dẫn Sử Dụng",
+    Content = "Đây là khung chứa văn bản thông báo hoặc hướng dẫn.\nDùng \\n để xuống dòng."
+})
+
+-- [2. MẪU CÔNG TẮC BẬT/TẮT LỒNG VÒNG LẶP (TOGGLE)]
+Tabs.Farm:AddSection("Cấu Hình Công Tắc")
 local ExampleToggle = Tabs.Farm:AddToggle("ExampleToggle", { 
-    Title = "Tên Công Tắc Mẫu", 
+    Title = "Tên Công Tắc (Toggle)", 
+    Description = "Mô tả ngắn gọn chức năng ở đây",
     Default = Config.AutoFarm 
 })
 ExampleToggle:OnChanged(function(Value)
     Config.AutoFarm = Value
-    -- <-- VIẾT CODE XỬ LÝ TRỰC TIẾP TẠI ĐÂY KHI BẬT/TẮT CÔNG TẮC
+    
+    if Value then
+        task.spawn(function()
+            while Config.AutoFarm do
+                pcall(function()
+                    -- Viết code chạy ngầm liên tục khi bật nút ở đây
+                end)
+                task.wait(0.1)
+            end
+        end)
+    end
 end)
 
--- [MẪU 2: VÍ DỤ NÚT BẤM (BUTTON)]
-Tabs.Farm:AddSection("Ví Dụ Nút Bấm")
+-- [3. MẪU NÚT BẤM (BUTTON)]
+Tabs.Farm:AddSection("Cấu Hình Nút Bấm")
 Tabs.Farm:AddButton({
-    Title = "Tên Nút Bấm Mẫu",
+    Title = "Tên Nút Bấm (Button)",
+    Description = "Bấm vào để kích hoạt hành động 1 lần",
     Callback = function()
-        -- <-- VIẾT CODE CHẠY 1 LẦN TẠI ĐÂY KHI BẤM NÚT
+        -- Viết logic thực thi 1 lần ở đây
+    end
+})
+
+-- [4. MẪU DANH SÁCH CHỌN (DROPDOWN)]
+Tabs.Farm:AddSection("Cấu Hình Menu Chọn")
+local ExampleDropdown = Tabs.Farm:AddDropdown("ExampleDropdown", {
+    Title = "Danh Sách Chọn (Dropdown)",
+    Values = {"Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3","Lựa chọn 4","Lựa chọn 5","Lựa chọn 6","Lựa chọn 7","Lựa chọn 8","Lựa chọn 9","Lựa chọn 10","Lựa chọn 11","Lựa chọn 12"},
+    Default = "Lựa chọn 1",
+    Multi = false,
+    Callback = function(Value)
+        -- Viết logic xử lý giá trị được chọn ở đây
+    end
+})
+
+-- [5. MẪU THANH TRƯỢT SỐ (SLIDER)]
+Tabs.Farm:AddSection("Cấu Hình Thanh Trượt")
+local ExampleSlider = Tabs.Farm:AddSlider("ExampleSlider", {
+    Title = "Thanh Trượt Giá Trị (Slider)",
+    Description = "Kéo để thay đổi giá trị số",
+    Default = 300,
+    Min = 100,
+    Max = 500,
+    Rounding = 0,
+    Callback = function(Value)
+        Config.TweenSpeed = Value
+        -- Viết logic cập nhật thông số ở đây
+    end
+})
+
+-- [6. MẪU Ô NHẬP LIỆU (INPUT)]
+Tabs.Farm:AddSection("Cấu Hình Ô Nhập Text")
+local ExampleInput = Tabs.Farm:AddInput("ExampleInput", {
+    Title = "Ô Nhập Liệu (Input)",
+    Default = "",
+    Placeholder = "Nhập văn bản vào đây...",
+    Numeric = false,
+    Finished = true,
+    Callback = function(Value)
+        -- Viết logic nhận dữ liệu chữ/số ở đây
+    end
+})
+
+-- [7. MẪU BẢNG CHỌN MÀU (COLORPICKER)]
+Tabs.Farm:AddSection("Cấu Hình Chọn Màu")
+local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
+    Title = "Bảng Chọn Màu (Colorpicker)",
+    Default = Color3.fromRGB(255, 255, 255),
+    Callback = function(Value)
+        -- Value trả về kiểu Color3 (RGB)
     end
 })
 
 -- ====================================================================
--- BẠN CÓ THỂ THÊM THÊM CODE VÀO CÁC TAB THEO MẪU DƯỚI ĐÂY:
--- Tabs.StackFarming:AddToggle(...)
--- Tabs.ItemShop:AddButton(...)
--- Tabs.ServerHopFarm:AddDropdown(...)
--- Tabs.ESPStats:...
--- Tabs.FruitRaid:...
--- Tabs.TeleportPvP:...
--- Tabs.Race:...
--- Tabs.SeaEvent:...
--- Tabs.DiscordWebhook:...
--- ====================================================================
-
 -- 5. CẤU HÌNH TAB SETTING (LƯU VÀ TẢI CẤU HÌNH)
+-- ====================================================================
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
 SaveManager:BuildConfigSection(Tabs.Setting)
 
--- 6. KHUNG VÒNG LẶP CHẠY NGẦM (BACKGROUND LOOP)
-task.spawn(function()
-    while task.wait(0.1) do
-        if Config.AutoFarm then
-            pcall(function()
-                -- <-- VIẾT CODE CHẠY LIÊN TỤC KHI BẬT CÁC CHỨC NĂNG CHẠY NGẦM TẠI ĐÂY
-            end)
-        end
-    end
-end)
-
 Window:SelectTab(1)
 Fluent:Notify({
     Title = "Blox Fruits Premium Hub",
-    Content = "Khung script đã sẵn sàng để thêm chức năng!",
+    Content = "Khung script đã sẵn sàng!",
     Duration = 5
 })
