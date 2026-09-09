@@ -4,6 +4,7 @@ local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local VirtualUser = game:GetService("VirtualUser")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -169,7 +170,7 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 4. QUẢN LÝ CONFIG TỰ ĐỘNG (AUTO SAVE / AUTO LOAD)
+-- 4. QUẢN LÝ CONFIG TỰ ĐỘNG (AUTO SAVE / AUTO LOAD / INSTANT RESET)
 -- ====================================================================
 
 SaveManager:SetLibrary(Fluent)
@@ -178,50 +179,70 @@ InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
--- TÊN FILE CONFIG TRỰC TIẾP: Têngame_Têntàikhoản
-local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
-local autoSaveActive = true
+-- 1. LẤY TÊN GAME VÀ TÊN TÀI KHOẢN ĐỂ TẠO TÊN FILE CONFIG
+local rawGameName = "Blox_Fruits"
+pcall(function()
+    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+    if info and info.Name then
+        rawGameName = info.Name:gsub("[^%w_]", "") -- Làm sạch tên game để không bị lỗi file
+    end
+end)
+
+local DEFAULT_CONFIG = string.format("%s_%s", rawGameName, LocalPlayer.Name)
 
 -- Chỉnh Theme & Keybind giao diện
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
 
--- NÚT RESET CONFIG TRONG TAB SETTING
+-- 2. TẠO NÚT RESET CONFIG TRONG TAB SETTING
 Tabs.Setting:AddSection("Đặt Lại Cấu Hình")
 
 Tabs.Setting:AddButton({
     Title = "Reset Config",
-    Description = "Xóa file cấu hình đã lưu. Vui lòng re-execute lại script để về mặc định.",
+    Description = "Xóa file lưu và khôi phục tất cả chức năng về mặc định ngay lập tức",
     Callback = function()
-        autoSaveActive = false
-        
+        -- Step A: Xóa file config đã lưu trên ổ đĩa
         pcall(function()
             local filePath = "FatCatHub/settings/" .. DEFAULT_CONFIG .. ".json"
             if isfile and isfile(filePath) then
                 delfile(filePath)
             end
         end)
+        
+        -- Step B: Ép tất cả thành phần UI về giá trị mặc định ban đầu
+        for _, option in pairs(Fluent.Options) do
+            pcall(function()
+                if option.Default ~= nil then
+                    option:SetValue(option.Default)
+                elseif option.Type == "Toggle" then
+                    option:SetValue(false)
+                end
+            end)
+        end
+
+        -- Step C: Lưu lại file config sạch ngay lập tức
+        pcall(function()
+            SaveManager:Save(DEFAULT_CONFIG)
+        end)
 
         Fluent:Notify({
             Title = "Fat Cat Hub",
-            Content = "Đã xóa file Config! Vui lòng re-execute lại Script để áp dụng mặc định.",
-            Duration = 5
+            Content = "Đã đặt lại toàn bộ cấu hình về mặc định!",
+            Duration = 4
         })
     end
 })
 
--- TỰ ĐỘNG TẢI CONFIG KHI BẮT ĐẦU CHẠY SCRIPT
+-- 3. TỰ ĐỘNG TẢI CONFIG KHI BẮT ĐẦU CHẠY SCRIPT
 pcall(function()
     SaveManager:Load(DEFAULT_CONFIG)
 end)
 
--- TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
+-- 4. TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
 task.spawn(function()
     while task.wait(2) do
-        if autoSaveActive then
-            pcall(function()
-                SaveManager:Save(DEFAULT_CONFIG)
-            end)
-        end
+        pcall(function()
+            SaveManager:Save(DEFAULT_CONFIG)
+        end)
     end
 end)
 
