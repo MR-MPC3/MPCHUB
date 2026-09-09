@@ -165,59 +165,44 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 4. TỰ ĐỘNG CONFIG & CHỈ HIỆN NÚT RESET TRÊN UI
+-- 4. QUẢN LÝ CONFIG CHUẨN MẶC ĐỊNH THEO FLUENT UI
 -- ====================================================================
 
 local ConfigFolderName = "FatCatHub"
-local AutoConfigFileName = "BloxFruit_" .. LocalPlayer.Name 
+local AutoConfigFileName = "BloxFruit_" .. LocalPlayer.Name
 
--- Cấu hình SaveManager chạy ngầm
+-- 1. Khai báo Library cho Addons
 SaveManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetFolder(ConfigFolderName)
-
--- Tùy chọn: Giữ cài đặt giao diện (Giao diện/Theme/Hotkey) trong Tab Setting nếu muốn
 InterfaceManager:SetLibrary(Fluent)
+
+-- 2. Cấu hình các tùy chọn bỏ qua khi save
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+
+-- 3. Thiết lập thư mục gốc của bạn
+SaveManager:SetFolder(ConfigFolderName)
 InterfaceManager:SetFolder(ConfigFolderName)
+
+-- 4. Tự động tạo giao diện chỉnh Theme, Keybind và Quản lý Config chuẩn Fluent
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
+SaveManager:BuildConfigSection(Tabs.Setting)
 
--- Thêm Section và nút Reset duy nhất vào Tab Setting
-Tabs.Setting:AddSection("Cấu Hình Tự Động (" .. AutoConfigFileName .. ".json)")
-
-Tabs.Setting:AddButton({
-    Title = "Reset Config",
-    Description = "Xóa toàn bộ cài đặt đã lưu của tài khoản này và khôi phục mặc định",
-    Callback = function()
-        -- Các đường dẫn file cấu hình Fluent có thể lưu
-        local path1 = ConfigFolderName .. "/" .. AutoConfigFileName .. ".json"
-        local path2 = ConfigFolderName .. "/settings/" .. AutoConfigFileName .. ".json"
-        
-        if isfile then
-            if isfile(path1) and delfile then delfile(path1) end
-            if isfile(path2) and delfile then delfile(path2) end
-        end
-        
-        Fluent:Notify({
-            Title = "Đã Reset Config",
-            Content = "Đã xóa file " .. AutoConfigFileName .. ".json! Vui lòng Re-exec lại script để về mặc định.",
-            Duration = 5
-        })
-    end
-})
-
--- 1. Tự động Load Config của người chơi khi mở Script
+-- 5. Tự động Load file Config cá nhân khi vừa bật script
 SaveManager:Load(AutoConfigFileName)
 
--- 2. Tự động Save Config mỗi khi người chơi thay đổi bất kỳ Toggle/Slider/Dropdown nào
-SaveManager:OnChanged(function()
-    SaveManager:Save(AutoConfigFileName)
+-- 6. Tự động Save định kỳ 3 giây/lần
+task.spawn(function()
+    while task.wait(3) do
+        pcall(function()
+            SaveManager:Save(AutoConfigFileName)
+        end)
+    end
 end)
 
--- Select Tab đầu tiên
 Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Blox Fruits Premium Hub",
-    Content = "Tự động tải cấu hình: " .. AutoConfigFileName .. ".json",
+    Content = "Đã tải cấu hình: " .. AutoConfigFileName,
     Duration = 4
 })
