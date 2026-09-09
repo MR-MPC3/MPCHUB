@@ -169,28 +169,66 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 4. QUẢN LÝ CONFIG MẶC ĐỊNH THƯ VIỆN FLUENT UI
+-- 4. QUẢN LÝ CONFIG TỰ ĐỘNG (AUTO SAVE / AUTO LOAD)
 -- ====================================================================
 
--- Thiết lập thư viện cho Addons
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 
--- Cấu hình bỏ qua thiết lập giao diện khi lưu config
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
--- Tự động tạo giao diện chỉnh Theme, Keybind và Quản lý Config trong Tab Settings
-InterfaceManager:BuildInterfaceSection(Tabs.Setting)
-SaveManager:BuildConfigSection(Tabs.Setting)
+-- TÊN FILE CONFIG TRỰC TIẾP: Têngame_Têntàikhoản
+local DEFAULT_CONFIG = "BloxFruits_" .. LocalPlayer.Name
+local autoSaveActive = true
 
--- Tự động tải Config được thiết lập Autoload trong menu UI (nếu có)
-SaveManager:LoadAutoloadConfig()
+-- Chỉnh Theme & Keybind giao diện
+InterfaceManager:BuildInterfaceSection(Tabs.Setting)
+
+-- NÚT RESET CONFIG TRONG TAB SETTING
+Tabs.Setting:AddSection("Đặt Lại Cấu Hình")
+
+Tabs.Setting:AddButton({
+    Title = "Reset Config",
+    Description = "Xóa file cấu hình đã lưu. Vui lòng re-execute lại script để về mặc định.",
+    Callback = function()
+        autoSaveActive = false
+        
+        pcall(function()
+            local filePath = "FatCatHub/settings/" .. DEFAULT_CONFIG .. ".json"
+            if isfile and isfile(filePath) then
+                delfile(filePath)
+            end
+        end)
+
+        Fluent:Notify({
+            Title = "Fat Cat Hub",
+            Content = "Đã xóa file Config! Vui lòng re-execute lại Script để áp dụng mặc định.",
+            Duration = 5
+        })
+    end
+})
+
+-- TỰ ĐỘNG TẢI CONFIG KHI BẮT ĐẦU CHẠY SCRIPT
+pcall(function()
+    SaveManager:Load(DEFAULT_CONFIG)
+end)
+
+-- TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
+task.spawn(function()
+    while task.wait(2) do
+        if autoSaveActive then
+            pcall(function()
+                SaveManager:Save(DEFAULT_CONFIG)
+            end)
+        end
+    end
+end)
 
 Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Fat Cat Hub",
-    Content = "Đã tải giao diện và cấu hình thành công!",
+    Content = "Đã tải giao diện và cấu hình: " .. DEFAULT_CONFIG,
     Duration = 4
 })
