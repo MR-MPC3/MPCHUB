@@ -45,7 +45,7 @@ local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/M
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/InterfaceManager.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "Blox Fruits Premium Hub",
+    Title = "Fat Cat Hub",
     SubTitle = "v2.5 Full Edition | Sea " .. tostring(currentSea),
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
@@ -165,44 +165,28 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 4. QUẢN LÝ CONFIG CHUẨN MẶC ĐỊNH THEO FLUENT UI
+-- 4. QUẢN LÝ CONFIG MẶC ĐỊNH THƯ VIỆN FLUENT UI
 -- ====================================================================
 
-local ConfigFolderName = "FatCatHub"
-local AutoConfigFileName = "BloxFruit_" .. LocalPlayer.Name
-
--- 1. Khai báo Library cho Addons
+-- Thiết lập thư viện cho Addons
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 
--- 2. Cấu hình các tùy chọn bỏ qua khi save
+-- Cấu hình bỏ qua thiết lập giao diện khi lưu config
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
--- 3. Thiết lập thư mục gốc của bạn
-SaveManager:SetFolder(ConfigFolderName)
-InterfaceManager:SetFolder(ConfigFolderName)
-
--- 4. Tự động tạo giao diện chỉnh Theme, Keybind và Quản lý Config chuẩn Fluent
+-- Tự động tạo giao diện chỉnh Theme, Keybind và Quản lý Config trong Tab Settings
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
 SaveManager:BuildConfigSection(Tabs.Setting)
 
--- 5. Tự động Load file Config cá nhân khi vừa bật script
-SaveManager:Load(AutoConfigFileName)
-
--- 6. Tự động Save định kỳ 3 giây/lần
-task.spawn(function()
-    while task.wait(3) do
-        pcall(function()
-            SaveManager:Save(AutoConfigFileName)
-        end)
-    end
-end)
+-- Tự động tải Config được thiết lập Autoload trong menu UI (nếu có)
+SaveManager:LoadAutoloadConfig()
 
 Window:SelectTab(1)
 
 Fluent:Notify({
-    Title = "Blox Fruits Premium Hub",
-    Content = "Đã tải cấu hình: " .. AutoConfigFileName,
+    Title = "Fat Cat Hub",
+    Content = "Đã tải giao diện và cấu hình thành công!",
     Duration = 4
 })
