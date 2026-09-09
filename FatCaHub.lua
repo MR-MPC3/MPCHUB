@@ -170,7 +170,7 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 4. QUẢN LÝ CONFIG TỰ ĐỘNG (AUTO SAVE / AUTO LOAD / INSTANT RESET)
+-- 4. QUẢN LÝ CONFIG TỰ ĐỘNG
 -- ====================================================================
 
 SaveManager:SetLibrary(Fluent)
@@ -179,12 +179,11 @@ InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
--- 1. LẤY TÊN GAME VÀ TÊN TÀI KHOẢN ĐỂ TẠO TÊN FILE CONFIG
 local rawGameName = "Blox_Fruits"
 pcall(function()
     local info = MarketplaceService:GetProductInfo(game.PlaceId)
     if info and info.Name then
-        rawGameName = info.Name:gsub("[^%w_]", "") -- Làm sạch tên game để không bị lỗi file
+        rawGameName = info.Name:gsub("[^%w_]", "")
     end
 end)
 
@@ -192,15 +191,15 @@ local DEFAULT_CONFIG = string.format("%s_%s", rawGameName, LocalPlayer.Name)
 
 -- Chỉnh Theme & Keybind giao diện
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
+SaveManager:BuildConfigSection(Tabs.Setting)
 
--- 2. TẠO NÚT RESET CONFIG TRONG TAB SETTING
+-- TẠO NÚT RESET CONFIG TRONG TAB SETTING
 Tabs.Setting:AddSection("Đặt Lại Cấu Hình")
 
 Tabs.Setting:AddButton({
     Title = "Reset Config",
     Description = "Xóa file lưu và khôi phục tất cả chức năng về mặc định ngay lập tức",
     Callback = function()
-        -- Step A: Xóa file config đã lưu trên ổ đĩa
         pcall(function()
             local filePath = "FatCatHub/settings/" .. DEFAULT_CONFIG .. ".json"
             if isfile and isfile(filePath) then
@@ -208,7 +207,6 @@ Tabs.Setting:AddButton({
             end
         end)
         
-        -- Step B: Ép tất cả thành phần UI về giá trị mặc định ban đầu
         for _, option in pairs(Fluent.Options) do
             pcall(function()
                 if option.Default ~= nil then
@@ -219,7 +217,6 @@ Tabs.Setting:AddButton({
             end)
         end
 
-        -- Step C: Lưu lại file config sạch ngay lập tức
         pcall(function()
             SaveManager:Save(DEFAULT_CONFIG)
         end)
@@ -232,12 +229,12 @@ Tabs.Setting:AddButton({
     end
 })
 
--- 3. TỰ ĐỘNG TẢI CONFIG KHI BẮT ĐẦU CHẠY SCRIPT
+-- TỰ ĐỘNG TẢI CONFIG KHI BẮT ĐẦU CHẠY SCRIPT
 pcall(function()
     SaveManager:Load(DEFAULT_CONFIG)
 end)
 
--- 4. TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
+-- TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
 task.spawn(function()
     while task.wait(2) do
         pcall(function()
