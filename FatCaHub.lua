@@ -46,6 +46,7 @@ local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.
 
 -- TÊN THƯ MỤC CONFIG CỦA HUB
 SaveManager:SetFolder("FatCatHub")
+InterfaceManager:SetFolder("FatCatHub")
 
 local Window = Fluent:CreateWindow({
     Title = "Fat Cat Hub",
