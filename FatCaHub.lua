@@ -44,6 +44,9 @@ local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/InterfaceManager.lua"))()
 
+-- TÊN THƯ MỤC CONFIG CỦA HUB
+SaveManager:SetFolder("FatCatHub")
+
 local Window = Fluent:CreateWindow({
     Title = "Fat Cat Hub",
     SubTitle = "v2.5 Full Edition | Sea " .. tostring(currentSea),
