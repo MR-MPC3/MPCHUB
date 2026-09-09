@@ -179,7 +179,7 @@ SaveManager:IgnoreThemeSettings()
 SaveManager:SetIgnoreIndexes({})
 
 -- TÊN FILE CONFIG TRỰC TIẾP: Têngame_Têntàikhoản
-local DEFAULT_CONFIG = "BloxFruits_" .. LocalPlayer.Name
+local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
 local autoSaveActive = true
 
 -- Chỉnh Theme & Keybind giao diện
