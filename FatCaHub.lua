@@ -11,9 +11,9 @@ local LocalPlayer = Players.LocalPlayer
 -- 0. KIỂM TRA MAP (SEA CHECK)
 -- ====================================================================
 local MAP_SEAS = {
-    [85211729168715] = 1,   -- Sea 1
-    [79091703265657] = 2,   -- Sea 2
-    [100117331123089] = 3   -- Sea 3
+    [85211729168715] = 1,    -- Sea 1
+    [79091703265657] = 2,    -- Sea 2
+    [100117331123089] = 3    -- Sea 3
 }
 
 local currentSea = MAP_SEAS[game.PlaceId]
@@ -38,58 +38,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
 end)
 
 -- ====================================================================
--- 1. BẢNG CẤU HÌNH & HỆ THỐNG TỰ ĐỘNG LƯU/TẢI THEO TÊN NGUỜI CHƠI
--- ====================================================================
-local ConfigFileName = "BloxFruits_" .. LocalPlayer.Name .. "_Config.json"
-
-local DefaultConfig = {
-    AutoFarm = false,
-    FarmMode = "Level",
-    SelectedWeapon = "Melee",
-    AutoQuest = true,
-    FastAttack = true,
-    AutoBuso = true,
-    TweenSpeed = 300,
-    AutoCakePrince = false,
-    AutoDoughKing = false,
-    AutoBones = false,
-    SelectedDropdown = "Lựa chọn 1",
-    InputText = ""
-}
-
-local Config = {}
-for k, v in pairs(DefaultConfig) do
-    Config[k] = v
-end
-
-local function SaveConfig()
-    pcall(function()
-        if writefile then
-            writefile(ConfigFileName, HttpService:JSONEncode(Config))
-        end
-    end)
-end
-
-local function LoadConfig()
-    pcall(function()
-        if isfile and isfile(ConfigFileName) and readfile then
-            local decoded = HttpService:JSONDecode(readfile(ConfigFileName))
-            if type(decoded) == "table" then
-                for k, v in pairs(decoded) do
-                    if Config[k] ~= nil then
-                        Config[k] = v
-                    end
-                end
-            end
-        end
-    end)
-end
-
--- Tải cấu hình tài khoản ngay khi thực thi script
-LoadConfig()
-
--- ====================================================================
--- 2. KHỞI TẠO CỬA SỔ UI (FLUENT)
+-- 1. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
 -- ====================================================================
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
@@ -105,7 +54,7 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- 3. KHỞI TẠO 12 TAB CHÍNH
+-- 2. KHỞI TẠO 12 TAB CHÍNH
 local TabDefinitions = {
     {"Info", "Info", "info"},
     {"Farm", "Farm", "sword"},
@@ -127,7 +76,7 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- 4. BỘ MẪU CÁC THÀNH PHẦN GIAO DIỆN (FLUENT COMPONENTS)
+-- 3. BỘ MẪU CÁC THÀNH PHẦN GIAO DIỆN (FLUENT COMPONENTS)
 -- ====================================================================
 
 -- [1. PARAGRAPH]
@@ -141,15 +90,12 @@ Tabs.Farm:AddSection("Cấu Hình Công Tắc")
 local ExampleToggle = Tabs.Farm:AddToggle("ExampleToggle", { 
     Title = "Tên Công Tắc (Toggle)", 
     Description = "Mô tả ngắn gọn chức năng ở đây",
-    Default = Config.AutoFarm 
+    Default = false 
 })
 ExampleToggle:OnChanged(function(Value)
-    Config.AutoFarm = Value
-    SaveConfig()
-    
     if Value then
         task.spawn(function()
-            while Config.AutoFarm do
+            while Fluent.Options.ExampleToggle and Fluent.Options.ExampleToggle.Value do
                 pcall(function()
                     -- Code chạy ngầm ở đây
                 end)
@@ -174,11 +120,10 @@ Tabs.Farm:AddSection("Cấu Hình Menu Chọn")
 local ExampleDropdown = Tabs.Farm:AddDropdown("ExampleDropdown", {
     Title = "Danh Sách Chọn (Dropdown)",
     Values = {"Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4", "Lựa chọn 5"},
-    Default = Config.SelectedDropdown,
+    Default = "Lựa chọn 1",
     Multi = false,
     Callback = function(Value)
-        Config.SelectedDropdown = Value
-        SaveConfig()
+        -- Logic xử lý khi chọn
     end
 })
 
@@ -187,13 +132,12 @@ Tabs.Farm:AddSection("Cấu Hình Thanh Trượt")
 local ExampleSlider = Tabs.Farm:AddSlider("ExampleSlider", {
     Title = "Thanh Trượt Giá Trị (Slider)",
     Description = "Kéo để thay đổi giá trị số",
-    Default = Config.TweenSpeed,
+    Default = 300,
     Min = 100,
     Max = 500,
     Rounding = 0,
     Callback = function(Value)
-        Config.TweenSpeed = Value
-        SaveConfig()
+        -- Logic xử lý khi kéo slider
     end
 })
 
@@ -201,13 +145,12 @@ local ExampleSlider = Tabs.Farm:AddSlider("ExampleSlider", {
 Tabs.Farm:AddSection("Cấu Hình Ô Nhập Text")
 local ExampleInput = Tabs.Farm:AddInput("ExampleInput", {
     Title = "Ô Nhập Liệu (Input)",
-    Default = Config.InputText,
+    Default = "",
     Placeholder = "Nhập văn bản vào đây...",
     Numeric = false,
     Finished = true,
     Callback = function(Value)
-        Config.InputText = Value
-        SaveConfig()
+        -- Logic xử lý khi nhập xong
     end
 })
 
@@ -222,43 +165,59 @@ local ExampleColorpicker = Tabs.Farm:AddColorpicker("ExampleColorpicker", {
 })
 
 -- ====================================================================
--- 5. CẤU HÌNH TAB SETTING (THEME, TRONG SUỐT, PHÍM TẮT & NÚT RESET)
+-- 4. TỰ ĐỘNG CONFIG & CHỈ HIỆN NÚT RESET TRÊN UI
 -- ====================================================================
 
-InterfaceManager:SetLibrary(Fluent)
+local ConfigFolderName = "FatCatHub"
+local AutoConfigFileName = "BloxFruit_" .. LocalPlayer.Name 
+
+-- Cấu hình SaveManager chạy ngầm
 SaveManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
+SaveManager:SetFolder(ConfigFolderName)
 
+-- Tùy chọn: Giữ cài đặt giao diện (Giao diện/Theme/Hotkey) trong Tab Setting nếu muốn
+InterfaceManager:SetLibrary(Fluent)
+InterfaceManager:SetFolder(ConfigFolderName)
 InterfaceManager:BuildInterfaceSection(Tabs.Setting)
 
-Tabs.Setting:AddSection("Quản Lý Cấu Hình (" .. LocalPlayer.Name .. ")")
+-- Thêm Section và nút Reset duy nhất vào Tab Setting
+Tabs.Setting:AddSection("Cấu Hình Tự Động (" .. AutoConfigFileName .. ".json)")
 
 Tabs.Setting:AddButton({
-    Title = "Đặt Lại Cấu Hình Mặc Định",
-    Description = "Khôi phục toàn bộ cài đặt chức năng về mặc định",
+    Title = "Reset Config",
+    Description = "Xóa toàn bộ cài đặt đã lưu của tài khoản này và khôi phục mặc định",
     Callback = function()
-        for k, v in pairs(DefaultConfig) do
-            Config[k] = v
+        -- Các đường dẫn file cấu hình Fluent có thể lưu
+        local path1 = ConfigFolderName .. "/" .. AutoConfigFileName .. ".json"
+        local path2 = ConfigFolderName .. "/settings/" .. AutoConfigFileName .. ".json"
+        
+        if isfile then
+            if isfile(path1) and delfile then delfile(path1) end
+            if isfile(path2) and delfile then delfile(path2) end
         end
         
-        SaveConfig()
-        
-        ExampleToggle:SetValue(Config.AutoFarm)
-        ExampleDropdown:SetValue(Config.SelectedDropdown)
-        ExampleSlider:SetValue(Config.TweenSpeed)
-        ExampleInput:SetValue(Config.InputText)
-        
         Fluent:Notify({
-            Title = "Cấu Hình",
-            Content = "Đã đặt lại cấu hình về mặc định!",
-            Duration = 3
+            Title = "Đã Reset Config",
+            Content = "Đã xóa file " .. AutoConfigFileName .. ".json! Vui lòng Re-exec lại script để về mặc định.",
+            Duration = 5
         })
     end
 })
 
+-- 1. Tự động Load Config của người chơi khi mở Script
+SaveManager:Load(AutoConfigFileName)
+
+-- 2. Tự động Save Config mỗi khi người chơi thay đổi bất kỳ Toggle/Slider/Dropdown nào
+SaveManager:OnChanged(function()
+    SaveManager:Save(AutoConfigFileName)
+end)
+
+-- Select Tab đầu tiên
 Window:SelectTab(1)
+
 Fluent:Notify({
     Title = "Blox Fruits Premium Hub",
-    Content = "Đã nhận diện Sea " .. tostring(currentSea) .. " | Tải cấu hình tài khoản " .. LocalPlayer.Name .. " thành công!",
-    Duration = 5
+    Content = "Tự động tải cấu hình: " .. AutoConfigFileName .. ".json",
+    Duration = 4
 })
