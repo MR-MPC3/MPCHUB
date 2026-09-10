@@ -48,7 +48,7 @@ local SeaBeastsFolder = Workspace:FindFirstChild("SeaBeasts")   -- Quái biển 
 local BoatsFolder = Workspace:FindFirstChild("Boats")           -- Thuyền người chơi
 
 -- ====================================================================
--- 3.KIỂM TRA MAP (SEA CHECK)
+-- 5.KIỂM TRA MAP (SEA CHECK)
 -- ====================================================================
 local MAP_SEAS = {
     [85211729168715] = 1,    -- Sea 1
@@ -67,7 +67,7 @@ local Sea2 = currentSea == 2
 local Sea3 = currentSea == 3
 
 -- ====================================================================
--- 4.KHỞI TẠO NHÂN VẬT
+-- 6.KHỞI TẠO NHÂN VẬT
 -- ====================================================================
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -78,7 +78,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
 end)
 
 -- ====================================================================
--- 5. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
+-- 7. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
 -- ====================================================================
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
@@ -119,8 +119,15 @@ for _, tabData in ipairs(TabDefinitions) do
     Tabs[tabData[1]] = Window:AddTab({ Title = tabData[2], Icon = tabData[3] })
 end
 
+-- Anti-AFK Tránh văng Game sau 20 phút
+LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0, 0), Workspace.CurrentCamera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0, 0), Workspace.CurrentCamera.CFrame)
+end)
+
 -- ====================================================================
--- 6.HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
+-- 8.HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
 -- ====================================================================
 local function BuildUI()
     
