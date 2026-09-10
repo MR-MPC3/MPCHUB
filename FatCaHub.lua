@@ -9,7 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")-- Kho dữ liệu
 local VirtualUser = game:GetService("VirtualUser")           -- Giả lập hành động người dùng (Dùng làm Anti-AFK để không bị văng game sau 20 phút)
 
 -- ====================================================================
--- CÁC DỊCH VỤ BỔ SUNG CHO BLOX FRUITS
+-- 2.CÁC DỊCH VỤ BỔ SUNG CHO BLOX FRUITS
 -- ====================================================================
 local Workspace = game:GetService("Workspace")               -- Không gian 3D (Dùng tìm vị trí Quái vật, Rương, Trái quỷ rơi, Đảo Bí Cảnh)
 local TeleportService = game:GetService("TeleportService")   -- Quản lý chuyển Server (Dùng làm Server Hop tìm Boss/Trái hoặc Rejoin khi văng)
@@ -19,7 +19,7 @@ local Lighting = game:GetService("Lighting")                 -- Quản lý ánh 
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_") -- Remote trung tâm (Dùng Nhận Q, Mua võ/đồ, Cộng điểm, Cất trái, Mua vé Raid)
 
 -- ====================================================================
--- 2.KIỂM TRA MAP (SEA CHECK)
+-- 3.KIỂM TRA MAP (SEA CHECK)
 -- ====================================================================
 local MAP_SEAS = {
     [85211729168715] = 1,    -- Sea 1
@@ -38,7 +38,7 @@ local Sea2 = currentSea == 2
 local Sea3 = currentSea == 3
 
 -- ====================================================================
--- 3.KHỞI TẠO NHÂN VẬT
+-- 4.KHỞI TẠO NHÂN VẬT
 -- ====================================================================
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -49,7 +49,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
 end)
 
 -- ====================================================================
--- 4. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
+-- 5. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
 -- ====================================================================
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
@@ -91,7 +91,7 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- 5.HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
+-- 6.HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
 -- ====================================================================
 local function BuildUI()
     
