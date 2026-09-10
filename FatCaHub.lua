@@ -70,16 +70,7 @@ local SeaBeastsFolder = Workspace:FindFirstChild("SeaBeasts")
 local BoatsFolder = Workspace:FindFirstChild("Boats")
 
 -- ====================================================================
--- 5. LẮNG NGHE HỆ THỐNG (SYSTEM EVENTS & ANTI-AFK)
--- ====================================================================
-LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
-end)
-
--- ====================================================================
--- 6. KHỞI TẠO FRAMEWORK FLUENT UI & TABS
+-- 5. KHỞI TẠO FRAMEWORK FLUENT UI & TABS
 -- ====================================================================
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
@@ -114,6 +105,15 @@ local Tabs = {}
 for _, tabData in ipairs(TabDefinitions) do
     Tabs[tabData[1]] = Window:AddTab({ Title = tabData[2], Icon = tabData[3] })
 end
+
+-- ====================================================================
+-- 6. CÁC HÀM HỖ TRỢ CÁC CHỨC NĂNG TRONG BUILD UI
+-- ====================================================================
+LocalPlayer.Idled:Connect(function()
+    VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
+    task.wait(1)
+    VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
+end)
 
 -- ====================================================================
 -- 7. XÂY DỰNG GIAO DIỆN CHỨC NĂNG (BUILD UI ELEMENTS)
@@ -205,9 +205,7 @@ local function BuildUI()
     })
 end
 
--- ====================================================================
 -- 8. QUẢN LÝ CẤU HÌNH & TỰ ĐỘNG LƯU (SAVE MANAGER & CONFIG)
--- ====================================================================
 local function SetupConfigManager()
     local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
     local autoSaveActive = true
@@ -277,7 +275,7 @@ local function SetupConfigManager()
 end
 
 -- ====================================================================
--- 9. THỰC THI KHỞI CHẠY HỆ THỐNG
+-- 8. THỰC THI KHỞI CHẠY HỆ THỐNG
 -- ====================================================================
 BuildUI()
 
