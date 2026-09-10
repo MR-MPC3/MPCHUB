@@ -173,7 +173,7 @@ local function BuildUI()
     })
 
     -------------------------------------------------------------------
-    -- 4. QUẢN LÝ CONFIG TỰ ĐỘNG (AUTO SAVE / AUTO LOAD)
+    -- 4. QUẢN LÝ CONFIG TỰ ĐỘNG KHI CÓ THAY ĐỔI (EVENT-BASED SAVE)
     -------------------------------------------------------------------
     local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
     local autoSaveActive = true
@@ -216,12 +216,28 @@ local function BuildUI()
         SaveManager:Load(DEFAULT_CONFIG)
     end)
 
-    -- TỰ ĐỘNG LƯU CONFIG NGẦM MỖI 2 GIÂY
-    task.spawn(function()
-        while task.wait(2) do
-            if autoSaveActive then
-                pcall(function()
-                    SaveManager:Save(DEFAULT_CONFIG)
+    -- BỘ LỌC DEBOUNCE: Chỉ ghi đè file sau 0.5s kể từ thao tác chỉnh sửa cuối cùng
+    local saveThread = nil
+    local function RequestAutoSave()
+        if not autoSaveActive then return end
+        
+        if saveThread then
+            task.cancel(saveThread)
+        end
+        
+        saveThread = task.delay(0.5, function()
+            pcall(function()
+                SaveManager:Save(DEFAULT_CONFIG)
+            end)
+        end)
+    end
+
+    -- ĐĂNG KÝ TỰ ĐỘNG LƯU CHO TẤT CẢ TÙY CHỌN UI
+    task.defer(function()
+        for _, option in pairs(Fluent.Options) do
+            if type(option) == "table" and typeof(option.OnChanged) == "function" then
+                option:OnChanged(function()
+                    RequestAutoSave()
                 end)
             end
         end
