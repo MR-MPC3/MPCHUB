@@ -42,6 +42,7 @@ local CommE = Remotes and Remotes:WaitForChild("CommE", 10)  -- Remote Event ph�
 
 -- Thư mục chứa đối tượng trong Map Blox Fruits
 local EnemiesFolder = Workspace:WaitForChild("Enemies", 10)      -- Quái vật & Boss đang sống
+local NPCsFolder = Workspace:WaitForChild("NPCs", 10)            -- NPC giao nhiệm vụ, shop, sự kiện
 local MapFolder = Workspace:WaitForChild("Map", 10)              -- Đảo, Công trình (Đảo Bí Cảnh Mirage, Cổng Race V4)
 local SeaBeastsFolder = Workspace:FindFirstChild("SeaBeasts")   -- Quái biển (Thuyền ma, Sea Beast)
 local BoatsFolder = Workspace:FindFirstChild("Boats")           -- Thuyền người chơi
