@@ -1,14 +1,25 @@
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local HttpService = game:GetService("HttpService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local VirtualUser = game:GetService("VirtualUser")
-
-local LocalPlayer = Players.LocalPlayer
+-- ====================================================================
+-- 1.DỊCH VỤ HỆ THỐNG ROBLOX (ROBLOX SERVICES)
+-- ====================================================================
+local Players = game:GetService("Players")                   -- Quản lý người chơi (Lấy thông tin LocalPlayer, danh sách người chơi trong Server)
+local RunService = game:GetService("RunService")             -- Vòng lặp theo khung hình (Dùng cho Noclip xuyên tường, Gom quái, Giữ nhân vật lơ lửng)
+local TweenService = game:GetService("TweenService")         -- Tạo di chuyển mượt (Dùng làm Bay / Tween Teleport an toàn không bị Kick)
+local HttpService = game:GetService("HttpService")           -- Xử lý chuỗi JSON (Dùng gửi Discord Webhook, xử lý API danh sách Server)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")-- Kho dữ liệu chung (Nơi chứa các Remote Event giao tiếp với Server)
+local VirtualUser = game:GetService("VirtualUser")           -- Giả lập hành động người dùng (Dùng làm Anti-AFK để không bị văng game sau 20 phút)
 
 -- ====================================================================
--- 0. KIỂM TRA MAP (SEA CHECK)
+-- CÁC DỊCH VỤ BỔ SUNG CHO BLOX FRUITS
+-- ====================================================================
+local Workspace = game:GetService("Workspace")               -- Không gian 3D (Dùng tìm vị trí Quái vật, Rương, Trái quỷ rơi, Đảo Bí Cảnh)
+local TeleportService = game:GetService("TeleportService")   -- Quản lý chuyển Server (Dùng làm Server Hop tìm Boss/Trái hoặc Rejoin khi văng)
+local UserInputService = game:GetService("UserInputService") -- Lắng nghe phím/chạm màn hình (Dùng gán phím tắt Bật/Tắt giao diện UI)
+local VirtualInputManager = game:GetService("VirtualInputManager") -- Giả lập Click mượt (Dùng làm Fast Attack đánh nhanh & Auto tung Skill)
+local Lighting = game:GetService("Lighting")                 -- Quản lý ánh sáng (Dùng làm Fullbright sáng màn hình, Xóa sương mù Fog)
+local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_") -- Remote trung tâm (Dùng Nhận Q, Mua võ/đồ, Cộng điểm, Cất trái, Mua vé Raid)
+
+-- ====================================================================
+-- 2.KIỂM TRA MAP (SEA CHECK)
 -- ====================================================================
 local MAP_SEAS = {
     [85211729168715] = 1,    -- Sea 1
@@ -27,7 +38,7 @@ local Sea2 = currentSea == 2
 local Sea3 = currentSea == 3
 
 -- ====================================================================
--- KHỞI TẠO NHÂN VẬT
+-- 3.KHỞI TẠO NHÂN VẬT
 -- ====================================================================
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
@@ -38,7 +49,7 @@ LocalPlayer.CharacterAdded:Connect(function(newChar)
 end)
 
 -- ====================================================================
--- 1. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
+-- 4. KHỞI TẠO CỬA SỔ UI (FLUENT) & ADDONS
 -- ====================================================================
 local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mr-PMC/FluentUI/refs/heads/master/Addons/SaveManager.lua"))()
@@ -80,13 +91,10 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
+-- 5.HÀM XÂY DỰNG GIAO DIỆN VÀ CẤU HÌNH CONFIG (BUILD UI & CONFIG)
 -- ====================================================================
 local function BuildUI()
-    -------------------------------------------------------------------
-    -- 3. BỘ MẪU CÁC THÀNH PHẦN GIAO DIỆN (FLUENT COMPONENTS)
-    -------------------------------------------------------------------
-
+    
     -- [1. PARAGRAPH]
     Tabs.Farm:AddParagraph({
         Title = "Hướng Dẫn Sử Dụng",
@@ -173,7 +181,7 @@ local function BuildUI()
     })
 
     -------------------------------------------------------------------
-    -- 4. QUẢN LÝ CONFIG TỰ ĐỘNG KHI CÓ THAY ĐỔI (EVENT-BASED SAVE)
+    -- 8. QUẢN LÝ CONFIG TỰ ĐỘNG KHI CÓ THAY ĐỔI (EVENT-BASED SAVE)
     -------------------------------------------------------------------
     local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
     local autoSaveActive = true
