@@ -1,22 +1,50 @@
 -- ====================================================================
--- 1.DỊCH VỤ HỆ THỐNG ROBLOX (ROBLOX SERVICES)
+-- 1. DỊCH VỤ HỆ THỐNG ROBLOX (ROBLOX SERVICES)
 -- ====================================================================
-local Players = game:GetService("Players")                   -- Quản lý người chơi (Lấy thông tin LocalPlayer, danh sách người chơi trong Server)
-local RunService = game:GetService("RunService")             -- Vòng lặp theo khung hình (Dùng cho Noclip xuyên tường, Gom quái, Giữ nhân vật lơ lửng)
-local TweenService = game:GetService("TweenService")         -- Tạo di chuyển mượt (Dùng làm Bay / Tween Teleport an toàn không bị Kick)
-local HttpService = game:GetService("HttpService")           -- Xử lý chuỗi JSON (Dùng gửi Discord Webhook, xử lý API danh sách Server)
-local ReplicatedStorage = game:GetService("ReplicatedStorage")-- Kho dữ liệu chung (Nơi chứa các Remote Event giao tiếp với Server)
-local VirtualUser = game:GetService("VirtualUser")           -- Giả lập hành động người dùng (Dùng làm Anti-AFK để không bị văng game sau 20 phút)
+local Players = game:GetService("Players")               -- Quản lý danh sách người chơi
+local RunService = game:GetService("RunService")         -- Vòng lặp Render khung hình (Noclip, Bring Mob, Fast Attack)
+local TweenService = game:GetService("TweenService")     -- Di chuyển mượt (Tween Fly/Teleport)
+local HttpService = game:GetService("HttpService")       -- Xử lý JSON (Discord Webhook, Server Hop API)
+local ReplicatedStorage = game:GetService("ReplicatedStorage") -- Kho chứa dữ liệu chung giữa Server & Client
+local VirtualUser = game:GetService("VirtualUser")       -- Giả lập thao tác (Anti-AFK chống văng sau 20p)
+local CoreGui = game:GetService("CoreGui")               -- Quản lý UI hệ thống (Bảo vệ UI không bị game xóa)
+local Stats = game:GetService("Stats")                   -- Đọc thông số hệ thống (Ping / FPS)
+local MarketplaceService = game:GetService("MarketplaceService") -- Kiểm tra Gamepass & Vật phẩm Shop
+local CollectionService = game:GetService("CollectionService")   -- Lọc nhanh Rương, Trái Quỷ, Boss theo Tag
+local PathfindingService = game:GetService("PathfindingService") -- Tìm đường tự động né vật cản
+local GuiService = game:GetService("GuiService")         -- Tính toán viền màn hình (Cần cho ESP vẽ chính xác)
+
+local ParentGui = (gethui and gethui()) or CoreGui
 
 -- ====================================================================
--- 2.CÁC DỊCH VỤ BỔ SUNG CHO BLOX FRUITS
+-- 2. CÁC DỊCH VỤ BỔ SUNG CHO BLOX FRUITS
 -- ====================================================================
-local Workspace = game:GetService("Workspace")               -- Không gian 3D (Dùng tìm vị trí Quái vật, Rương, Trái quỷ rơi, Đảo Bí Cảnh)
-local TeleportService = game:GetService("TeleportService")   -- Quản lý chuyển Server (Dùng làm Server Hop tìm Boss/Trái hoặc Rejoin khi văng)
-local UserInputService = game:GetService("UserInputService") -- Lắng nghe phím/chạm màn hình (Dùng gán phím tắt Bật/Tắt giao diện UI)
-local VirtualInputManager = game:GetService("VirtualInputManager") -- Giả lập Click mượt (Dùng làm Fast Attack đánh nhanh & Auto tung Skill)
-local Lighting = game:GetService("Lighting")                 -- Quản lý ánh sáng (Dùng làm Fullbright sáng màn hình, Xóa sương mù Fog)
-local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_") -- Remote trung tâm (Dùng Nhận Q, Mua võ/đồ, Cộng điểm, Cất trái, Mua vé Raid)
+local Workspace = game:GetService("Workspace")           -- Không gian 3D (Xác định vị trí Mobs, Chests, Fruits)
+local TeleportService = game:GetService("TeleportService") -- Quản lý chuyển Server (Server Hop, Rejoin)
+local UserInputService = game:GetService("UserInputService") -- Lắng hệ phím bấm / Cảm ứng màn hình
+local VirtualInputManager = game:GetService("VirtualInputManager") -- Giả lập Click mượt (Fast Attack / Auto Skill)
+local ProximityPromptService = game:GetService("ProximityPromptService") -- Tự động giữ/bấm phím E
+local Lighting = game:GetService("Lighting")             -- Quản lý ánh sáng (Fullbright, Clear Fog)
+
+-- ====================================================================
+-- 3. ĐỐI TƯỢNG NHÂN VẬT, CAMERA & CHUỘT
+-- ====================================================================
+local LocalPlayer = Players.LocalPlayer                  -- Người chơi hiện tại
+local Mouse = LocalPlayer:GetMouse()                     -- Chuột người chơi (Dùng cho Aimbot / Chọn mục tiêu Skill)
+local Camera = Workspace.CurrentCamera                   -- Camera góc nhìn (Dùng vẽ ESP / Chỉnh FOV / Lock Cam)
+
+-- ====================================================================
+-- 4. REMOTES & THƯ MỤC ĐẶC THÙ BLOX FRUITS
+-- ====================================================================
+local Remotes = ReplicatedStorage:WaitForChild("Remotes", 10)
+local CommF = Remotes and Remotes:WaitForChild("CommF_", 10) -- Remote Function chính (Q, Mua đồ, Stats, Fruit, Raid)
+local CommE = Remotes and Remotes:WaitForChild("CommE", 10)  -- Remote Event phụ (Kích hoạt một số tính năng Balo/Skill)
+
+-- Thư mục chứa đối tượng trong Map Blox Fruits
+local EnemiesFolder = Workspace:WaitForChild("Enemies", 10)      -- Quái vật & Boss đang sống
+local MapFolder = Workspace:WaitForChild("Map", 10)              -- Đảo, Công trình (Đảo Bí Cảnh Mirage, Cổng Race V4)
+local SeaBeastsFolder = Workspace:FindFirstChild("SeaBeasts")   -- Quái biển (Thuyền ma, Sea Beast)
+local BoatsFolder = Workspace:FindFirstChild("Boats")           -- Thuyền người chơi
 
 -- ====================================================================
 -- 3.KIỂM TRA MAP (SEA CHECK)
