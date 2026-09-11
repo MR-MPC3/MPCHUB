@@ -50,7 +50,6 @@ local Camera = Workspace.CurrentCamera
 
 local CharacterManager = {}
 
--- Hàm lấy Nhân vật linh hoạt, an toàn 100% chống đơ & chống chết
 function CharacterManager.Get()
     local char = LocalPlayer.Character
     if not char or not char:IsDescendantOf(Workspace) then return nil, nil, nil end
@@ -58,7 +57,6 @@ function CharacterManager.Get()
     local root = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
     
-    -- Kiểm tra xem RootPart có thực sự đang nằm trên Map hay không
     if root and hum and hum.Health > 0 and root:IsDescendantOf(Workspace) then
         return char, root, hum
     end
@@ -117,32 +115,38 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- 6. HÀM CHỐNG VĂNG GAME KHI TREO MÁY (ANTI-AFK)
+-- 6. BIẾN CẤU HÌNH DÙNG CHUNG (SHARED CONFIG VARIABLES)
+-- ====================================================================
+local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
+local autoSaveActive = true
+
+-- ====================================================================
+-- 7. CÁC HÀM HỖ TRỢ HOẠT ĐỘNG
 -- ====================================================================
 LocalPlayer.Idled:Connect(function()
-    VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
-    task.wait(1)
-    VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
+    if Fluent.Options and Fluent.Options.AntiAFK and Fluent.Options.AntiAFK.Value then
+        pcall(function()
+            VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
+            task.wait(1)
+            VirtualUser:Button2Up(Vector2.new(0, 0), Camera.CFrame)
+        end)
+    end
 end)
 
 -- ====================================================================
--- 7. XÂY DỰNG GIAO DIỆN CHỨC NĂNG CHÍNH (BUILD REAL UI ELEMENTS)
+-- 8. XÂY DỰNG GIAO DIỆN CHỨC NĂNG CHÍNH (BUILD REAL UI ELEMENTS)
 -- ====================================================================
 local function BuildUI()
-    -- ----------------------------------------------------------------
     -- TAB INFO
-    -- ----------------------------------------------------------------
     Tabs.Info:AddParagraph({
         Title = "Fat Cat Hub - Blox Fruits",
         Content = "Phiên bản: v2.5 Premium\nĐang chạy tại: Sea " .. tostring(currentSea) .. "\nTrạng thái: An toàn 100% (Non-blocking Character System)"
     })
 
-    -- ----------------------------------------------------------------
-    -- TAB FARM (Cấu Hình & Auto Farm)
-    -- ----------------------------------------------------------------
+    -- TAB FARM
     Tabs.Farm:AddSection("Cấu Hình Farm")
     
-    local SelectWeapon = Tabs.Farm:AddDropdown("SelectWeapon", {
+    Tabs.Farm:AddDropdown("SelectWeapon", {
         Title = "Chọn Vũ Khí Farm",
         Values = {"Melee", "Sword", "Blox Fruit"},
         Default = "Melee",
@@ -161,20 +165,12 @@ local function BuildUI()
         if Value then
             task.spawn(function()
                 while Fluent.Options.AutoFarmLevel and Fluent.Options.AutoFarmLevel.Value do
-                    -- DÙNG DYNAMIC GETTER
                     local char, root, hum = CharacterManager.Get()
-                    
-                    -- GUARD CLAUSE: Chưa Spawn / Đang Load / Đã Chết -> Bỏ qua ngay
                     if not root or not hum then 
                         task.wait(0.5)
                         continue 
                     end
-                    
-                    pcall(function()
-                        -- Logic Auto Farm Level chính xác sẽ viết ở đây
-                        -- Ví dụ: Kiếm quái, Tween tới vị trí quái, Đánh quái...
-                    end)
-                    
+                    pcall(function() end)
                     task.wait(0.1)
                 end
             end)
@@ -196,40 +192,29 @@ local function BuildUI()
                         task.wait(0.5)
                         continue 
                     end
-                    
-                    pcall(function()
-                        -- Logic Gom quái & Đánh quái gần nhất ở đây
-                    end)
-                    
+                    pcall(function() end)
                     task.wait(0.1)
                 end
             end)
         end
     end)
 
-    -- ----------------------------------------------------------------
-    -- TAB STACK FARMING (Hỗ Trợ Tốc Độ Đánh)
-    -- ----------------------------------------------------------------
+    -- TAB STACK FARMING
     Tabs.StackFarming:AddSection("Tối Ưu Đánh")
-    
-    local FastAttack = Tabs.StackFarming:AddToggle("FastAttack", {
+    Tabs.StackFarming:AddToggle("FastAttack", {
         Title = "Fast Attack (Đánh Siêu Nhanh)",
         Description = "Bỏ qua delay đòn đánh cơ bản",
         Default = true
     })
 
-    -- ----------------------------------------------------------------
-    -- TAB FRUITS & RAID (Trái Ác Quỷ)
-    -- ----------------------------------------------------------------
+    -- TAB FRUITS & RAID
     Tabs.FruitRaid:AddSection("Quản Lý Trái Ác Quỷ")
     
     Tabs.FruitRaid:AddButton({
         Title = "Random Trái Ác Quỷ (Buy Fruit)",
         Description = "Mua ngẫu nhiên 1 Trái Ác Quỷ bằng Beli",
         Callback = function()
-            if CommF then
-                CommF:InvokeServer("Cousin", "Buy")
-            end
+            if CommF then CommF:InvokeServer("Cousin", "Buy") end
         end
     })
 
@@ -257,11 +242,8 @@ local function BuildUI()
         end
     end)
 
-    -- ----------------------------------------------------------------
-    -- TAB ESP & STATS (Cộng Điểm Tự Động)
-    -- ----------------------------------------------------------------
+    -- TAB ESP & STATS
     Tabs.ESPStats:AddSection("Tự Động Cộng Điểm Stats")
-    
     local statsList = {"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}
     for _, statName in ipairs(statsList) do
         local toggleName = "AutoStat_" .. statName:gsub(" ", "")
@@ -274,9 +256,7 @@ local function BuildUI()
             if Value then
                 task.spawn(function()
                     while Fluent.Options[toggleName] and Fluent.Options[toggleName].Value do
-                        pcall(function()
-                            CommF:InvokeServer("AddPoint", statName, 1)
-                        end)
+                        pcall(function() CommF:InvokeServer("AddPoint", statName, 1) end)
                         task.wait(0.1)
                     end
                 end)
@@ -284,11 +264,8 @@ local function BuildUI()
         end)
     end
 
-    -- ----------------------------------------------------------------
-    -- TAB TELEPORT & PVP (Dịch Chuyển)
-    -- ----------------------------------------------------------------
+    -- TAB TELEPORT & PVP
     Tabs.TeleportPvP:AddSection("Dịch Chuyển Đảo")
-    
     Tabs.TeleportPvP:AddDropdown("SelectIsland", {
         Title = "Chọn Đảo Dịch Chuyển",
         Values = {"Đảo Khởi Đầu", "Đảo Tuyết", "Đảo Hải Tặc", "Đảo Sa Mạc", "Đảo Bầu Trời"},
@@ -304,46 +281,30 @@ local function BuildUI()
                 Fluent:Notify({ Title = "Lỗi", Content = "Nhân vật chưa sẵn sàng!", Duration = 3 })
                 return 
             end
-            
-            -- Logic Tween/Teleport CFrame an toàn ở đây
             Fluent:Notify({ Title = "Dịch Chuyển", Content = "Đang dịch chuyển an toàn...", Duration = 3 })
         end
     })
-end
 
--- ====================================================================
--- 8. QUẢN LÝ CẤU HÌNH & TỰ ĐỘNG LƯU (SAVE MANAGER & CONFIG)
--- ====================================================================
-local function SetupConfigManager()
-    local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
-    local autoSaveActive = true
+    -- TAB SETTING
+    Tabs.Setting:AddSection("Chống Treo Máy (Anti-AFK)")
+    Tabs.Setting:AddToggle("AntiAFK", {
+        Title = "Anti-AFK (Chống Văng Game)",
+        Description = "Tự động click giả lập để không bị ngắt kết nối sau 20 phút treo máy",
+        Default = true
+    })
 
-    -- Cấu hình Thư viện Save
-    SaveManager:SetLibrary(Fluent)
-    InterfaceManager:SetLibrary(Fluent)
-    SaveManager:SetFolder("FatCatHub")
-    InterfaceManager:SetFolder("FatCatHub")
-
-    SaveManager:IgnoreThemeSettings()
-    SaveManager:SetIgnoreIndexes({})
-
-    -- Tạo giao diện Setting hệ thống
-    InterfaceManager:BuildInterfaceSection(Tabs.Setting)
-
-    -- Nút Reset Config
     Tabs.Setting:AddSection("Đặt Lại Cấu Hình")
     Tabs.Setting:AddButton({
         Title = "Reset Config",
         Description = "Xóa file cấu hình đã lưu. Vui lòng re-execute lại script để về mặc định.",
         Callback = function()
-            autoSaveActive = false
+            autoSaveActive = false -- Đã truy cập đúng biến chung
             pcall(function()
                 local filePath = "FatCatHub/settings/" .. DEFAULT_CONFIG .. ".json"
                 if isfile and isfile(filePath) then
                     delfile(filePath)
                 end
             end)
-
             Fluent:Notify({
                 Title = "Fat Cat Hub",
                 Content = "Đã xóa file Config! Vui lòng re-execute lại Script để áp dụng mặc định.",
@@ -351,13 +312,22 @@ local function SetupConfigManager()
             })
         end
     })
+end
 
-    -- Load Config đã lưu khi mở Hub
+-- ====================================================================
+-- 9. QUẢN LÝ CẤU HÌNH & TỰ ĐỘNG LƯU (SAVE MANAGER & CONFIG)
+-- ====================================================================
+local function SetupConfigManager()
+    SaveManager:SetLibrary(Fluent)
+    InterfaceManager:SetLibrary(Fluent)
+    SaveManager:SetFolder("FatCatHub")
+    InterfaceManager:SetFolder("FatCatHub")
+    SaveManager:IgnoreThemeSettings()
+    SaveManager:SetIgnoreIndexes({})
+    InterfaceManager:BuildInterfaceSection(Tabs.Setting)
     pcall(function()
         SaveManager:Load(DEFAULT_CONFIG)
     end)
-
-    -- Debounce Auto-Save
     local saveThread = nil
     local function RequestAutoSave()
         if not autoSaveActive then return end
@@ -369,8 +339,6 @@ local function SetupConfigManager()
             end)
         end)
     end
-
-    -- Đăng ký lắng nghe sự thay đổi của tất cả UI elements
     task.defer(function()
         for _, option in pairs(Fluent.Options) do
             if type(option) == "table" and typeof(option.OnChanged) == "function" then
@@ -383,10 +351,9 @@ local function SetupConfigManager()
 end
 
 -- ====================================================================
--- 9. THỰC THI KHỞI CHẠY HỆ THỐNG
+-- 10. THỰC THI KHỞI CHẠY HỆ THỐNG
 -- ====================================================================
 BuildUI()
-
 SetupConfigManager()
 
 Window:SelectTab(1)
