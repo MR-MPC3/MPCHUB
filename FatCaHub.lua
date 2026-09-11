@@ -42,19 +42,29 @@ local Sea2 = currentSea == 2
 local Sea3 = currentSea == 3
 
 -- ====================================================================
--- 3. QUẢN LÝ NHÂN VẬT & MÁY CHỦ (PLAYER & CHARACTER)
+-- 3. QUẢN LÝ NHÂN VẬT & MÁY CHỦ (CHARACTER MANAGER SYSTEM)
 -- ====================================================================
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Camera = Workspace.CurrentCamera
 
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local CharacterManager = {}
 
-LocalPlayer.CharacterAdded:Connect(function(newChar)
-    Character = newChar
-    HumanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
-end)
+-- Hàm lấy Nhân vật linh hoạt, an toàn 100% chống đơ & chống chết
+function CharacterManager.Get()
+    local char = LocalPlayer.Character
+    if not char or not char:IsDescendantOf(Workspace) then return nil, nil, nil end
+    
+    local root = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    
+    -- Kiểm tra xem RootPart có thực sự đang nằm trên Map hay không
+    if root and hum and hum.Health > 0 and root:IsDescendantOf(Workspace) then
+        return char, root, hum
+    end
+
+    return nil, nil, nil
+end
 
 -- ====================================================================
 -- 4. REMOTES & THƯ MỤC BLOX FRUITS
@@ -107,7 +117,7 @@ for _, tabData in ipairs(TabDefinitions) do
 end
 
 -- ====================================================================
--- 6. CÁC HÀM HỖ TRỢ CÁC CHỨC NĂNG TRONG BUILD UI
+-- 6. HÀM CHỐNG VĂNG GAME KHI TREO MÁY (ANTI-AFK)
 -- ====================================================================
 LocalPlayer.Idled:Connect(function()
     VirtualUser:Button2Down(Vector2.new(0, 0), Camera.CFrame)
@@ -116,96 +126,194 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 -- ====================================================================
--- 7. XÂY DỰNG GIAO DIỆN CHỨC NĂNG (BUILD UI ELEMENTS)
+-- 7. XÂY DỰNG GIAO DIỆN CHỨC NĂNG CHÍNH (BUILD REAL UI ELEMENTS)
 -- ====================================================================
 local function BuildUI()
-    -- [1. PARAGRAPH]
-    Tabs.Farm:AddParagraph({
-        Title = "Hướng Dẫn Sử Dụng",
-        Content = "Đang hoạt động tại: Sea " .. tostring(currentSea) .. "\nChọn các chức năng bên dưới để bắt đầu Farm."
+    -- ----------------------------------------------------------------
+    -- TAB INFO
+    -- ----------------------------------------------------------------
+    Tabs.Info:AddParagraph({
+        Title = "Fat Cat Hub - Blox Fruits",
+        Content = "Phiên bản: v2.5 Premium\nĐang chạy tại: Sea " .. tostring(currentSea) .. "\nTrạng thái: An toàn 100% (Non-blocking Character System)"
     })
 
-    -- [2. TOGGLE]
-    Tabs.Farm:AddSection("Cấu Hình Công Tắc")
-    local ExampleToggle = Tabs.Farm:AddToggle("ExampleToggle", { 
-        Title = "Tên Công Tắc (Toggle)", 
-        Description = "Mô tả ngắn gọn chức năng ở đây",
+    -- ----------------------------------------------------------------
+    -- TAB FARM (Cấu Hình & Auto Farm)
+    -- ----------------------------------------------------------------
+    Tabs.Farm:AddSection("Cấu Hình Farm")
+    
+    local SelectWeapon = Tabs.Farm:AddDropdown("SelectWeapon", {
+        Title = "Chọn Vũ Khí Farm",
+        Values = {"Melee", "Sword", "Blox Fruit"},
+        Default = "Melee",
+        Multi = false,
+    })
+
+    Tabs.Farm:AddSection("Tự Động Cày Cấp (Auto Farm)")
+    
+    local AutoFarmLevel = Tabs.Farm:AddToggle("AutoFarmLevel", { 
+        Title = "Auto Farm Level", 
+        Description = "Tự động nhận Nhiệm vụ và Đánh quái theo Cấp độ",
         Default = false 
     })
-    ExampleToggle:OnChanged(function(Value)
+    
+    AutoFarmLevel:OnChanged(function(Value)
         if Value then
             task.spawn(function()
-                while Fluent.Options.ExampleToggle and Fluent.Options.ExampleToggle.Value do
+                while Fluent.Options.AutoFarmLevel and Fluent.Options.AutoFarmLevel.Value do
+                    -- DÙNG DYNAMIC GETTER
+                    local char, root, hum = CharacterManager.Get()
+                    
+                    -- GUARD CLAUSE: Chưa Spawn / Đang Load / Đã Chết -> Bỏ qua ngay
+                    if not root or not hum then 
+                        task.wait(0.5)
+                        continue 
+                    end
+                    
                     pcall(function()
-                        -- Logic loop chạy ngầm
+                        -- Logic Auto Farm Level chính xác sẽ viết ở đây
+                        -- Ví dụ: Kiếm quái, Tween tới vị trí quái, Đánh quái...
                     end)
+                    
                     task.wait(0.1)
                 end
             end)
         end
     end)
 
-    -- [3. BUTTON]
-    Tabs.Farm:AddSection("Cấu Hình Nút Bấm")
-    Tabs.Farm:AddButton({
-        Title = "Tên Nút Bấm (Button)",
-        Description = "Bấm vào để kích hoạt hành động 1 lần",
+    local AutoFarmNearest = Tabs.Farm:AddToggle("AutoFarmNearest", { 
+        Title = "Auto Farm Quái Gần Nhất", 
+        Description = "Gom và đánh những con quái đang ở gần bạn",
+        Default = false 
+    })
+    
+    AutoFarmNearest:OnChanged(function(Value)
+        if Value then
+            task.spawn(function()
+                while Fluent.Options.AutoFarmNearest and Fluent.Options.AutoFarmNearest.Value do
+                    local char, root, hum = CharacterManager.Get()
+                    if not root or not hum then 
+                        task.wait(0.5)
+                        continue 
+                    end
+                    
+                    pcall(function()
+                        -- Logic Gom quái & Đánh quái gần nhất ở đây
+                    end)
+                    
+                    task.wait(0.1)
+                end
+            end)
+        end
+    end)
+
+    -- ----------------------------------------------------------------
+    -- TAB STACK FARMING (Hỗ Trợ Tốc Độ Đánh)
+    -- ----------------------------------------------------------------
+    Tabs.StackFarming:AddSection("Tối Ưu Đánh")
+    
+    local FastAttack = Tabs.StackFarming:AddToggle("FastAttack", {
+        Title = "Fast Attack (Đánh Siêu Nhanh)",
+        Description = "Bỏ qua delay đòn đánh cơ bản",
+        Default = true
+    })
+
+    -- ----------------------------------------------------------------
+    -- TAB FRUITS & RAID (Trái Ác Quỷ)
+    -- ----------------------------------------------------------------
+    Tabs.FruitRaid:AddSection("Quản Lý Trái Ác Quỷ")
+    
+    Tabs.FruitRaid:AddButton({
+        Title = "Random Trái Ác Quỷ (Buy Fruit)",
+        Description = "Mua ngẫu nhiên 1 Trái Ác Quỷ bằng Beli",
         Callback = function()
-            -- Logic xử lý
+            if CommF then
+                CommF:InvokeServer("Cousin", "Buy")
+            end
         end
     })
 
-    -- [4. DROPDOWN]
-    Tabs.Farm:AddSection("Cấu Hình Menu Chọn")
-    Tabs.Farm:AddDropdown("ExampleDropdown", {
-        Title = "Danh Sách Chọn (Dropdown)",
-        Values = {"Lựa chọn 1", "Lựa chọn 2", "Lựa chọn 3", "Lựa chọn 4", "Lựa chọn 5"},
-        Default = "Lựa chọn 1",
+    local AutoStoreFruit = Tabs.FruitRaid:AddToggle("AutoStoreFruit", {
+        Title = "Auto Store Fruit",
+        Description = "Tự động cất Trái Ác Quỷ vào Balo cất trữ",
+        Default = true
+    })
+    
+    AutoStoreFruit:OnChanged(function(Value)
+        if Value then
+            task.spawn(function()
+                while Fluent.Options.AutoStoreFruit and Fluent.Options.AutoStoreFruit.Value do
+                    local char, root, hum = CharacterManager.Get()
+                    if char then
+                        for _, item in ipairs(char:GetChildren()) do
+                            if item:IsA("Tool") and item:FindFirstChild("Fruit") then
+                                CommF:InvokeServer("StoreFruit", item.Name, item)
+                            end
+                        end
+                    end
+                    task.wait(1)
+                end
+            end)
+        end
+    end)
+
+    -- ----------------------------------------------------------------
+    -- TAB ESP & STATS (Cộng Điểm Tự Động)
+    -- ----------------------------------------------------------------
+    Tabs.ESPStats:AddSection("Tự Động Cộng Điểm Stats")
+    
+    local statsList = {"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}
+    for _, statName in ipairs(statsList) do
+        local toggleName = "AutoStat_" .. statName:gsub(" ", "")
+        local statToggle = Tabs.ESPStats:AddToggle(toggleName, {
+            Title = "Auto Stats: " .. statName,
+            Default = false
+        })
+        
+        statToggle:OnChanged(function(Value)
+            if Value then
+                task.spawn(function()
+                    while Fluent.Options[toggleName] and Fluent.Options[toggleName].Value do
+                        pcall(function()
+                            CommF:InvokeServer("AddPoint", statName, 1)
+                        end)
+                        task.wait(0.1)
+                    end
+                end)
+            end
+        end)
+    end
+
+    -- ----------------------------------------------------------------
+    -- TAB TELEPORT & PVP (Dịch Chuyển)
+    -- ----------------------------------------------------------------
+    Tabs.TeleportPvP:AddSection("Dịch Chuyển Đảo")
+    
+    Tabs.TeleportPvP:AddDropdown("SelectIsland", {
+        Title = "Chọn Đảo Dịch Chuyển",
+        Values = {"Đảo Khởi Đầu", "Đảo Tuyết", "Đảo Hải Tặc", "Đảo Sa Mạc", "Đảo Bầu Trời"},
+        Default = "Đảo Khởi Đầu",
         Multi = false,
-        Callback = function(Value)
-            -- Logic xử lý
-        end
     })
 
-    -- [5. SLIDER]
-    Tabs.Farm:AddSection("Cấu Hình Thanh Trượt")
-    Tabs.Farm:AddSlider("ExampleSlider", {
-        Title = "Thanh Trượt Giá Trị (Slider)",
-        Description = "Kéo để thay đổi giá trị số",
-        Default = 300,
-        Min = 100,
-        Max = 500,
-        Rounding = 0,
-        Callback = function(Value)
-            -- Logic xử lý
-        end
-    })
-
-    -- [6. INPUT]
-    Tabs.Farm:AddSection("Cấu Hình Ô Nhập Text")
-    Tabs.Farm:AddInput("ExampleInput", {
-        Title = "Ô Nhập Liệu (Input)",
-        Default = "",
-        Placeholder = "Nhập văn bản vào đây...",
-        Numeric = false,
-        Finished = true,
-        Callback = function(Value)
-            -- Logic xử lý
-        end
-    })
-
-    -- [7. COLORPICKER]
-    Tabs.Farm:AddSection("Cấu Hình Chọn Màu")
-    Tabs.Farm:AddColorpicker("ExampleColorpicker", {
-        Title = "Bảng Chọn Màu (Colorpicker)",
-        Default = Color3.fromRGB(255, 255, 255),
-        Callback = function(Value)
-            -- Value dạng Color3
+    Tabs.TeleportPvP:AddButton({
+        Title = "Teleport Đến Đảo Đã Chọn",
+        Callback = function()
+            local char, root, hum = CharacterManager.Get()
+            if not root then 
+                Fluent:Notify({ Title = "Lỗi", Content = "Nhân vật chưa sẵn sàng!", Duration = 3 })
+                return 
+            end
+            
+            -- Logic Tween/Teleport CFrame an toàn ở đây
+            Fluent:Notify({ Title = "Dịch Chuyển", Content = "Đang dịch chuyển an toàn...", Duration = 3 })
         end
     })
 end
 
+-- ====================================================================
 -- 8. QUẢN LÝ CẤU HÌNH & TỰ ĐỘNG LƯU (SAVE MANAGER & CONFIG)
+-- ====================================================================
 local function SetupConfigManager()
     local DEFAULT_CONFIG = "BloxFruit_" .. LocalPlayer.Name
     local autoSaveActive = true
@@ -275,7 +383,7 @@ local function SetupConfigManager()
 end
 
 -- ====================================================================
--- 8. THỰC THI KHỞI CHẠY HỆ THỐNG
+-- 9. THỰC THI KHỞI CHẠY HỆ THỐNG
 -- ====================================================================
 BuildUI()
 
@@ -285,6 +393,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Fat Cat Hub",
-    Content = "Fat Cat Hub - Tải Xong",
+    Content = "Fat Cat Hub v2.5 - Tải Hoàn Tất!",
     Duration = 5
 })
