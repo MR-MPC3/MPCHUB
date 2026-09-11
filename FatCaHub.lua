@@ -81,9 +81,7 @@ local Window = Fluent:CreateWindow({
     SubTitle = "v2.5 Full Edition | Sea " .. tostring(currentSea),
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.End
+    Acrylic = true
 })
 
 local TabDefinitions = {
