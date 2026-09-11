@@ -83,6 +83,7 @@ local Window = Fluent:CreateWindow({
     Size = UDim2.fromOffset(580, 320),
     Acrylic = true,
     ToggleIcon = "rbxassetid://13717478897",
+    ToggleIconSize = UDim2.fromOffset(60, 60),
 })
 
 local TabDefinitions = {
