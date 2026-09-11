@@ -80,8 +80,8 @@ local Window = Fluent:CreateWindow({
     Title = "Fat Cat Hub",
     SubTitle = "v2.5 Full Edition | Sea " .. tostring(currentSea),
     TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true
+    Size = UDim2.fromOffset(580, 400),
+    Acrylic = true,
 })
 
 local TabDefinitions = {
