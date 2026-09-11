@@ -23,7 +23,7 @@ local Lighting = game:GetService("Lighting")
 local ParentGui = (gethui and gethui()) or CoreGui
 
 -- ====================================================================
--- 2. KIỂM TRA MAP & SEA CHECK (Thực hiện sớm để tránh tốn tài nguyên)
+-- 2. KIỂM TRA MAP & SEA CHECK 
 -- ====================================================================
 local MAP_SEAS = {
     [85211729168715] = 1,  -- Sea 1
