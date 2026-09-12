@@ -47,20 +47,16 @@ local Sea3 = currentSea == 3
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 local Camera = Workspace.CurrentCamera
-
 local CharacterManager = {}
 
 function CharacterManager.Get()
     local char = LocalPlayer.Character
     if not char or not char:IsDescendantOf(Workspace) then return nil, nil, nil end
-    
     local root = char:FindFirstChild("HumanoidRootPart")
     local hum = char:FindFirstChildOfClass("Humanoid")
-    
     if root and hum and hum.Health > 0 and root:IsDescendantOf(Workspace) then
         return char, root, hum
     end
-
     return nil, nil, nil
 end
 
