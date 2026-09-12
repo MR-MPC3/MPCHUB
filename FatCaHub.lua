@@ -140,7 +140,6 @@ local function BuildUI()
         Description = "",
         Default = true
     })
-
     Tabs.Setting:AddSection("Config")
     Tabs.Setting:AddButton({
         Title = "Reset Config",
