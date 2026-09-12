@@ -148,7 +148,7 @@ local function BuildUI()
     
     Tabs.Farm:AddDropdown("SelectWeapon", {
         Title = "Chọn Vũ Khí Farm",
-        Values = {"Melee", "Sword", "Blox Fruit"},
+        Values = {"Melee", "Sword", "Blox Fruit", "Blox Fruit1", "Blox Frui2t", "Blox Fruit3", "Blox Fruit4", "Blox Fruit5", "Blox Fruit6", "Blox Fruit7", "Blox Fruit8", "Blox Fruit9", "Blox Fruit10"},
         Default = "Melee",
         Multi = false,
     })
