@@ -133,18 +133,18 @@ end)
 -- 8. XÂY DỰNG GIAO DIỆN CHỨC NĂNG CHÍNH (BUILD REAL UI ELEMENTS)
 -- ====================================================================
 local function BuildUI()
+    
     -- TAB SETTING
-    Tabs.Setting:AddSection("Chống Treo Máy (Anti-AFK)")
     Tabs.Setting:AddToggle("AntiAFK", {
-        Title = "Anti-AFK (Chống Văng Game)",
-        Description = "Tự động click giả lập để không bị ngắt kết nối sau 20 phút treo máy",
+        Title = "Anti-AFK",
+        Description = "",
         Default = true
     })
 
-    Tabs.Setting:AddSection("Đặt Lại Cấu Hình")
+    Tabs.Setting:AddSection("Config")
     Tabs.Setting:AddButton({
         Title = "Reset Config",
-        Description = "Xóa file cấu hình đã lưu. Vui lòng re-execute lại script để về mặc định.",
+        Description = "Delete saved configuration file",
         Callback = function()
             autoSaveActive = false -- Đã truy cập đúng biến chung
             pcall(function()
@@ -155,7 +155,7 @@ local function BuildUI()
             end)
             Fluent:Notify({
                 Title = "Fat Cat Hub",
-                Content = "Đã xóa file Config! Vui lòng re-execute lại Script để áp dụng mặc định.",
+                Content = "Config deleted! Execute the script again to apply default.",
                 Duration = 5
             })
         end
