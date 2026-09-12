@@ -129,17 +129,27 @@ LocalPlayer.Idled:Connect(function()
     end
 end)
 
+-- Vòng lặp Auto Turn on Buso
+task.spawn(function()
+    while task.wait(1) do
+        pcall(function()
+            if Fluent.Options and Fluent.Options.AutoBuso and Fluent.Options.AutoBuso.Value then
+                local char, root, hum = CharacterManager.Get()
+                if char and hum and hum.Health > 0 then
+                    if not char:FindFirstChild("HasBuso") and CommF then
+                        CommF:InvokeServer("Buso")
+                    end
+                end
+            end
+        end)
+    end
+end)
+
 -- ====================================================================
 -- 8. XÂY DỰNG GIAO DIỆN CHỨC NĂNG CHÍNH (BUILD REAL UI ELEMENTS)
 -- ====================================================================
 local function BuildUI()
-    
-    -- TAB SETTING
-    Tabs.Setting:AddToggle("AntiAFK", {
-        Title = "Anti-AFK",
-        Description = "",
-        Default = true
-    })
+        -- TAB SETTING
     Tabs.Setting:AddSection("Config")
     Tabs.Setting:AddButton({
         Title = "Reset Config",
@@ -159,6 +169,17 @@ local function BuildUI()
             })
         end
     })
+    Tabs.Setting:AddToggle("AutoBuso", {
+        Title = "Auto Turn on Buso",
+        Description = "",
+        Default = false
+    })
+    Tabs.Setting:AddToggle("AntiAFK", {
+        Title = "Anti AFK",
+        Description = "",
+        Default = true
+    })
+    
 end
 
 -- ====================================================================
